@@ -8,7 +8,6 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 const cloudinary = require('cloudinary');
@@ -20,11 +19,11 @@ cloudinary.config({
     secure: true
 });
 
+const tag = "nuxtjs-phone-answering-machine";
+
 app.all('/callback', async (request, response) => {
 
     const body = request.body;
-
-    console.log(body);
 
     if (body.CallStatus !== "completed") {
         const twiml = new VoiceResponse();
@@ -40,11 +39,25 @@ app.all('/callback', async (request, response) => {
         {
             resource_type: "raw",
             folder: "nuxtjs-phone-answering-machine",
+            tags: [tag],
             context: `From=${body.From}|FromCountry=${body.FromCountry}|FromCity=${body.FromCity}`
         },
         function (error, result) { console.log(result, error) });
 
     return response.json({ uploaded });
+
+});
+
+app.all('/list', async (request, response) => {
+
+    return await cloudinary.v2.api.resources_by_tag(
+        tag,
+        { resource_type: 'raw' },
+        function (error, result) {
+            return response.json(result);
+        }
+    );
+
 });
 
 module.exports = app
