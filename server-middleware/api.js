@@ -52,7 +52,7 @@ app.all('/list', async (request, response) => {
 
     return await cloudinary.v2.api.resources_by_tag(
         tag,
-        { resource_type: 'raw' },
+        { resource_type: 'raw', context: true },
         function (error, result) {
             return response.json(result);
         }
