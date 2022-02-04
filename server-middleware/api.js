@@ -34,13 +34,15 @@ app.all('/callback', async (request, response) => {
         return response.send(twiml.toString());
     }
 
+    const maskedPhoneNumber = body.From.slice(0, 3) + body.From.slice(3, -2).replace(/[0-9]/g, "*") + body.From.slice(-2);
+
     const uploaded = await cloudinary.v2.uploader.upload(
         body.RecordingUrl,
         {
-            resource_type: "raw",
+            resource_type: "video",
             folder: "nuxtjs-phone-answering-machine",
             tags: [tag],
-            context: `From=${body.From}|FromCountry=${body.FromCountry}|FromCity=${body.FromCity}`
+            context: `From=${maskedPhoneNumber}|FromCountry=${body.FromCountry}|FromCity=${body.FromCity}`
         },
         function (error, result) { console.log(result, error) });
 
@@ -52,7 +54,7 @@ app.all('/list', async (request, response) => {
 
     return await cloudinary.v2.api.resources_by_tag(
         tag,
-        { resource_type: 'raw', context: true },
+        { resource_type: 'video', context: true },
         function (error, result) {
             return response.json(result);
         }
